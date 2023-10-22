@@ -11,7 +11,7 @@ PLAYER_STR_FORMAT = 'player_{index}'
 class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   """Interfacing Melting Pot substrates and RLLib MultiAgentEnv."""
 
-  def __init__(self, env: dmlab2d.Environment):
+  def __init__(self, env: dmlab2d.Environment, shared_reward: bool = False):
     """Initializes the instance.
 
     Args:
@@ -26,6 +26,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     # RLLib requires environments to have the following member variables:
     # observation_space, action_space, and _agent_ids
     self._agent_ids = set(self._ordered_agent_ids)
+    self.shared_reward = shared_reward
     
     # RLLib expects a dictionary of agent_id to observation or action,
     # Melting Pot uses a tuple, so we convert them here
@@ -35,23 +36,34 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     self.action_space = self._convert_spaces_tuple_to_dict(
         utils.spec_to_space(self._env.action_spec()))
     super().__init__()
+    self._prev_timestep = None
 
   def reset(self, *args, **kwargs):
     """See base class."""
     timestep = self._env.reset()
+    self._prev_timestep = timestep
     return utils.timestep_to_observations(timestep), {}
 
   def step(self, action_dict):
     """See base class."""
     actions = [action_dict[agent_id] for agent_id in self._ordered_agent_ids]
     timestep = self._env.step(actions)
-    rewards = {
-        agent_id: timestep.reward[index]
-        for index, agent_id in enumerate(self._ordered_agent_ids)
-    }
+    if self.shared_reward:
+      total_reward = sum(timestep.reward)
+      rewards = {
+          agent_id: total_reward
+          for agent_id in self._ordered_agent_ids
+      }
+    else:
+      rewards = {
+          agent_id: timestep.reward[index]
+          for index, agent_id in enumerate(self._ordered_agent_ids)
+      }
+
     done = {'__all__': timestep.last()}
     info = {}
 
+    self._prev_timestep = timestep
     observations = utils.timestep_to_observations(timestep)
     return observations, rewards, done, done, info
 

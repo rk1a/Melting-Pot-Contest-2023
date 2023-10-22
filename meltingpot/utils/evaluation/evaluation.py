@@ -59,8 +59,8 @@ class VideoSubject(subject.Subject):
       self,
       root: str,
       *,
-      extension: str = 'webm',
-      codec: str = 'vp90',
+      extension: str = 'mp4',
+      codec: str = 'mp4v',
       fps: int = 30,
   ) -> None:
     """Initializes the instance.
@@ -86,7 +86,7 @@ class VideoSubject(subject.Subject):
       timestep: the most recent timestep.
     """
     rgb_frame = timestep.observation[0]['WORLD.RGB']
-    rgb_frame = rgb_frame.repeat(32, axis=0).repeat(32, axis=1)
+    # rgb_frame = rgb_frame.repeat(32, axis=0).repeat(32, axis=1)
     if timestep.step_type.first():
       if not os.path.isdir(self._root):
         os.makedirs(self._root)

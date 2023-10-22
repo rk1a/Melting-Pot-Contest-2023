@@ -86,7 +86,7 @@ def get_cli_args():
   parser.add_argument(
         "--downsample",
         type=bool,
-        default=True,
+        default=False,
         help="Whether to downsample substrates in MeltingPot. Defaults to 8.",
   )
 
@@ -94,6 +94,18 @@ def get_cli_args():
         "--as-test",
         action="store_true",
         help="Whether this script should be run as a test.",
+  )
+
+  parser.add_argument(
+        "--meta_policy",
+        action="store_true",
+        help="Whether to train a meta policy.",
+  )
+
+  parser.add_argument(
+        "--shared_reward",
+        action="store_true",
+        help="Whether to train with shared reward.",
   )
 
   args = parser.parse_args()

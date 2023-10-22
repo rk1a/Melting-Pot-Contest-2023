@@ -42,7 +42,7 @@ def run_evaluation(args):
   Supports generation of videos for both substrate and scenario plays during evalaution.
   """
   
-  ray.init()
+  ray.init(num_gpus=0, local_mode=True)
   config_file = f'{args.config_dir}/params.json'
   f = open(config_file)
   configs = json.load(f)

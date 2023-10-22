@@ -32,12 +32,36 @@ def get_experiment_config(args, default_config):
     
     if args.exp == 'pd_arena':
         substrate_name = "prisoners_dilemma_in_the_matrix__arena"
+        behavior_names = [
+            "prisoners_dilemma_in_the_matrix__arena__puppet_cooperator_0",
+            "prisoners_dilemma_in_the_matrix__arena__puppet_defector_0",
+            "prisoners_dilemma_in_the_matrix__arena__puppet_grim_one_strike_0",
+            "prisoners_dilemma_in_the_matrix__arena__puppet_grim_three_strikes_0",
+        ]
     elif args.exp == 'al_harvest':
         substrate_name = "allelopathic_harvest__open"
+        behavior_names = [
+            "allelopathic_harvest__open__bot_that_supports_green_0",
+            "allelopathic_harvest__open__bot_that_supports_red_0",
+            "allelopathic_harvest__open__bot_that_supports_green_1",
+            "allelopathic_harvest__open__bot_that_supports_red_1",
+        ]
     elif args.exp == 'clean_up':
         substrate_name = "clean_up"
+        behavior_names = [
+            "clean_up__consumer_0",
+            "clean_up__cleaner_0",
+            "clean_up__puppet_low_threshold_reciprocator_0",
+            "clean_up__puppet_high_threshold_reciprocator_0",
+        ]
     elif args.exp == 'territory_rooms':
         substrate_name = "territory__rooms"
+        behavior_names = [
+            "territory__rooms__aggressor_0",
+            "territory__rooms__aggressor_1",
+            "territory__rooms__aggressor_2",
+            "territory__rooms__aggressor_3",
+        ]
     else:
         raise Exception("Please set --exp to be one of ['pd_arena', 'al_harvest', 'clean_up', \
                         'territory_rooms']. Other substrates are not supported.")
@@ -49,6 +73,18 @@ def get_experiment_config(args, default_config):
         scale_factor = 8
     else:
         scale_factor = 1
+    
+    env_config = {
+        "substrate": substrate_name,
+        "roles": player_roles,
+        "scaled": scale_factor,
+        "shared_reward": args.shared_reward,
+    }
+    if args.meta_policy:
+        env_config["meta_policy"] = {
+            "behavior_names": behavior_names,
+        }
+
 
     params_dict = {
 
@@ -58,7 +94,7 @@ def get_experiment_config(args, default_config):
 
         # Env
         "env_name": "meltingpot",
-        "env_config": {"substrate": substrate_name, "roles": player_roles, "scaled": scale_factor},
+        "env_config": env_config,
 
 
         # training
@@ -81,13 +117,13 @@ def get_experiment_config(args, default_config):
         "lstm_use_prev_action": True,
         "lstm_use_prev_reward": False,
         "lstm_cell_size": 2,
-        "shared_policy": False,
+        "shared_policy": True,
 
         # experiment trials
         "exp_name": args.exp,
         "stopping": {
                     #"timesteps_total": 1000000,
-                    "training_iteration": 1,
+                    "training_iteration": 200,
                     #"episode_reward_mean": 100,
         },
         "num_checkpoints": 5,
